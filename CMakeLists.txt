@@ -1,0 +1,57 @@
+cmake_minimum_required(VERSION 3.2)
+
+message("cmake version: " ${CMAKE_VERSION})
+message("System name: " ${CMAKE_SYSTEM_NAME})
+message("System version: " ${CMAKE_SYSTEM_VERSION})
+message("Processer: " ${CMAKE_SYSTEM_PROCESSOR})
+
+aux_source_directory(. SRC_LIST)
+include_directories(.)
+set(CMAKE_CXX_FLAGS "-O3 -fPIC -std=c++11")
+
+set(CMAKE_SYSTEM_NAME Linux)
+#set(CMAKE_SYSTEM_NAME Android)
+#set(CMAKE_SYSTEM_NAME Windows)
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL Linux)
+	message("Linux平台")
+	set(LIBRARY_OUTPUT_PATH /usr/lib)
+	#set(EXECUTABLE_OUTPUT_PATH /usr/bin)
+	#include_directories(/usr/include/c++/4.9)
+	#include_directories(/usr/include/x86_64-linux-gnu)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL Android)
+	message("Android平台")
+	add_definitions(-D__STDC_INT64__)
+	set(CMAKE_C_COMPILER /usr/bin/arm-linux-androideabi-gcc)
+	set(CMAKE_CXX_COMPILER /usr/bin/arm-linux-androideabi-g++)
+	#set(CMAKE_C_COMPILER /usr/arm-linux-androideabi/bin/gcc)
+	#set(CMAKE_CXX_COMPILER /usr/arm-linux-androideabi/bin/g++)
+	
+	#set(CMAKE_CXX_FLAGS "-O3 -std=c++11 -MMD -MP -fpic -ffunction-sections -funwind-tables -no-canonical-prefixes -march=armv7-a -mfpu=vfpv3-d16 -mfloat-abi=softfp -mthumb -Os -g -DNDEBUG -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -DANDROID -Wa,--noexecstack -Wformat -Werror=format-security")
+	
+	#set(CMAKE_C_COMPILER $ENV{NDK_ROOT}/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86/bin/arm-linux-androideabi-gcc)
+	#set(CMAKE_CXX_COMPILER $ENV{NDK_ROOT}/toolchains/arm-linux-androideabi-4.8/prebuilt/linux-x86/bin/arm-linux-androideabi-g++)
+
+	#include_directories(/usr/lib/gcc/arm-linux-androideabi/4.7.4/include)
+	#include_directories(/usr/arm-linux-androideabi/include)
+	#include_directories(/usr/x86_64-linux-gnu/arm-linux-androideabi/include)
+
+	#include_directories($ENV{NDK_ROOT}/sources/cxx-stl/stlport/stlport)
+	include_directories($ENV{NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/4.8/include)
+	include_directories($ENV{NDK_ROOT}/sources/cxx-stl/gnu-libstdc++/4.8/libs/armeabi-v7a/include)
+	include_directories($ENV{NDK_ROOT}/sources/android/native_app_glue)
+	include_directories($ENV{NDK_ROOT}/platforms/android-19/arch-arm/usr/include)
+	link_directories($ENV{NDK_ROOT}/platforms/android-19/arch-arm/usr/lib)
+
+	#include_directories(/usr/include)
+	#include_directories(/usr/include/c++/6)
+	#include_directories(/usr/include/x86_64-linux-gnu)
+	#include_directories(/usr/include/x86_64-linux-gnu/c++/6)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+	message("Windows平台")
+	set(CMAKE_C_COMPILER /usr/bin/x86_64-w64-mingw32-gcc)
+	set(CMAKE_CXX_COMPILER /usr/bin/x86_64-w64-mingw32-g++)
+endif()
+
+#add_library(${PROJECT_NAME} SHARED ${SRC_LIST})
+#add_executable(${PROJECT_NAME} ${SRC_LIST})
