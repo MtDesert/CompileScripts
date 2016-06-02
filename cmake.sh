@@ -15,7 +15,7 @@ if [ $# == 2 ]; then
 	fi
 	cd build-${platformName}
 	cmake -DCMAKE_SYSTEM_NAME=${platformName} ..
-	make
+	sudo make
 else
 	echo "Syntax: $0 ProjectDirectory(which contain CMakeLists.txt) platform"
 fi
