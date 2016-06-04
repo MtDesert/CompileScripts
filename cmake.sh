@@ -1,4 +1,3 @@
-echo "参数数量$#"
 if [ $# == 2 ]; then
 	#set parameter
 	projectPath=$1
@@ -17,5 +16,5 @@ if [ $# == 2 ]; then
 	cmake -DCMAKE_SYSTEM_NAME=${platformName} ..
 	sudo make
 else
-	echo "Syntax: $0 ProjectDirectory(which contain CMakeLists.txt) platform"
+	echo "Syntax: $0 ProjectDirectory(which contain CMakeLists.txt) PlatformName(Linux,Android,etc.)"
 fi
