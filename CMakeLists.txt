@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 2.8)
 
 message("Cmake Version: " ${CMAKE_VERSION})
 message("System Name: " ${CMAKE_SYSTEM_NAME})
@@ -7,7 +7,7 @@ message("System Processer: " ${CMAKE_SYSTEM_PROCESSOR})
 
 aux_source_directory(. SRC_LIST)
 include_directories(.)
-set(CMAKE_CXX_FLAGS "-O3 -fPIC -std=c++11")
+set(CMAKE_CXX_FLAGS "-g -Wall -O3 -fPIC -std=c++11")
 
 #set(CMAKE_SYSTEM_NAME Linux)
 #set(CMAKE_SYSTEM_NAME Android)
