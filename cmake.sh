@@ -10,7 +10,7 @@ if [ $# == 2 ]; then
 			mkdir build-${platformName}
 		fi
 		cd build-${platformName}
-		cmake -DCMAKE_SYSTEM_NAME=${platformName} ..
+		cmake -DTARGET_SYSTEM_NAME=${platformName} ..
 		sudo make
 	else
 		echo "No such directory $projectPath"
