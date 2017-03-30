@@ -1,4 +1,12 @@
 #!/bin/bash
+mkdirp()
+{
+	mkdir -p $1
+	if [ $? != 0 ];then
+		exit
+	fi
+}
+
 workingDirectory=`pwd`
 if [ $# == 2 ]; then
 	projectPath=$1
@@ -10,17 +18,11 @@ if [ $# == 2 ]; then
 	fi
 	#second, maybe we need a directory to put the compiled object of our object(for make our project directory clean)
 	objectPath=obj #(change the name as you like)
-	if [ ! -d $objectPath ]; then 
-		mkdir $objectPath
-		echo fanhuizhi $?
-	fi
+	mkdirp $objectPath
 	#third, make a directory name $projectPath-$platform
 	cd $objectPath
-	if [ ! -d $projectPath-$platform ]; then 
-		mkdir $projectPath-$platform
-	fi
+	mkdirp $projectPath-$platform
 	cd $workingDirectory
-	
 	#fourth, check platform and do theirselves' methods
 	if [ $platform == Linux ]; then #we can use cmake, and then make
 		cd $projectPath
@@ -29,7 +31,10 @@ if [ $# == 2 ]; then
 		cmake -DTARGET_SYSTEM_NAME=${platform} $projectFullPath
 		sudo make
 	elif [ $platform == Android ]; then #we use android-ndk-rxxx/ndk-build
-		echo "there are mamy things to do...."
+		cd $objectPath/$projectPath-$platform
+		mkdirp jni
+		pwd
+		ndk-build V=1
 	elif [ $platform == Mac ]; then #not sure
 		echo "How to build for Mac????"
 	elif [ $platform == Windows ]; then #not sure
