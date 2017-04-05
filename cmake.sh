@@ -1,10 +1,14 @@
 #!/bin/bash
-mkdirp()
+exitWhileError()
 {
-	mkdir -p $1
 	if [ $? != 0 ];then
 		exit
 	fi
+}
+mkdirp()
+{
+	mkdir -p $1
+	exitWhileError
 }
 
 #main()
@@ -34,6 +38,7 @@ if [ $# == 2 ]; then
 	if [ $platform == Linux -o $platform == Android ]; then #we can use cmake, and then make
 		cd $workingDirectory/$objectPath/$projectPath-$platform
 		cmake -DTARGET_SYSTEM_NAME=${platform} -DLIBRARY_OUTPUT_PATH=../../$libPath -DEXECUTABLE_OUTPUT_PATH=../../$exePath ../../$projectPath
+		exitWhileError
 		sudo make
 	elif [ $platform == Mac ]; then #not sure
 		echo "How to build for Mac????"

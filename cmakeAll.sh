@@ -1,5 +1,10 @@
 #!/bin/bash
-
+exitWhileError()
+{
+	if [ $? != 0 ];then
+		exit
+	fi
+}
 #main()
 scriptDir=`dirname $0`
 platforms="Linux Android Windows Mac"
@@ -29,5 +34,6 @@ do
 	if [ $platform != false -a $project != false ]; then
 		#echo "$project $platform"
 		$scriptDir/cmake.sh $project $platform
+		exitWhileError
 	fi
 done
