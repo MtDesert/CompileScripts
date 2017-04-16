@@ -15,6 +15,7 @@ mkdirp()
 workingDirectory=`pwd`
 if [ $# == 2 ]; then
 	projectPath=$1
+	projectName=`basename $projectPath`
 	platform=$2
 	#first, projectPath must exist
 	#首先,工程路径必须存在
@@ -36,15 +37,15 @@ if [ $# == 2 ]; then
 	#third, make a directory name $projectPath-$platform in $objectPath
 	#接下来,在中间文件的目录中建立一个文件夹,以"工程路径-平台"的方式命名
 	cd $objectPath
-	mkdirp $projectPath-$platform
+	mkdirp $projectName-$platform
 	cd $workingDirectory
 	#fourth, check platform and do methods of theirselves
 	#接下来,检查一下目标平台,并执行特定的编译命令
 	if [ $platform == Linux -o $platform == Android ]; then #we can use cmake, and then make
-		cd $workingDirectory/$objectPath/$projectPath-$platform
-		cmake -DTARGET_SYSTEM_NAME=${platform} -DLIBRARY_OUTPUT_PATH=../../$libPath -DEXECUTABLE_OUTPUT_PATH=../../$exePath ../../$projectPath
+		cd $workingDirectory/$objectPath/$projectName-$platform
+		cmake -DTARGET_SYSTEM_NAME=${platform} -DLIBRARY_OUTPUT_PATH=$workingDirectory/$libPath -DEXECUTABLE_OUTPUT_PATH=$workingDirectory/$exePath $workingDirectory/$projectPath
 		exitWhileError
-		sudo make #You also can remove 'sudo' if unneccessary,如非必要,可以移除sudo
+		make
 	elif [ $platform == Mac ]; then #not sure
 		echo "How to build for Mac????"
 	elif [ $platform == Windows ]; then #not sure
