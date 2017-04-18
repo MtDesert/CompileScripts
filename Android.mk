@@ -2,11 +2,11 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-#LOCAL_MODULE    := LocalModule
-$(warning 哈哈${__ndk_modules})
-LOCAL_SRC_FILES := main.c cpp.cpp c.c
+LOCAL_MODULE    := ${PROJECT_NAME}
+LOCAL_SRC_FILES := $(wildcard $(WORKING_DIRECTORY)/$(NDK_PROJECT_PATH)/*.cpp)
+LOCAL_SRC_FILES += $(wildcard $(WORKING_DIRECTORY)/$(NDK_PROJECT_PATH)/*.c)
 LOCAL_LDLIBS    := -llog -landroid -lEGL -lGLESv1_CM
-LOCAL_STATIC_LIBRARIES := android_native_app_glue
+#LOCAL_STATIC_LIBRARIES := android_native_app_glue
 
 include $(BUILD_SHARED_LIBRARY)
 

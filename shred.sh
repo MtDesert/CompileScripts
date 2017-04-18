@@ -2,7 +2,7 @@
 function shredFile()
 {
 	echo Deleting File... $1
-	shred -fuvz $1
+	shred -fuz $1
 }
 
 function shredDir()
