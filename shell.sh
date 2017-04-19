@@ -19,7 +19,15 @@ exitWhenNoDir() #当目录不存在的时候退出
 		exit
 	fi
 }
+getAbsolutePath() #获取首参数的绝对路径(用于各种复杂的.和..的路径名称)
+{
+	currentPath=`pwd`
+	cd $1
+	absolutePath=`pwd`
+	cd ${currentPath} #记得回到原路径
+}
 
 #变量部分
 workingDirectory=`pwd` #工作目录,即此命令执行时候的工作目录
 scriptDirectory=`dirname $0` #脚本目录,此文件所在的目录
+absolutePath= #getAbsolutePath()的返回值
