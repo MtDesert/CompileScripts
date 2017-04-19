@@ -23,8 +23,10 @@ getAbsolutePath() #获取首参数的绝对路径(用于各种复杂的.和..的
 {
 	currentPath=`pwd`
 	cd $1
+	exitWhenError
 	absolutePath=`pwd`
 	cd ${currentPath} #记得回到原路径
+	exitWhenError
 }
 
 #变量部分

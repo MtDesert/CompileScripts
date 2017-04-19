@@ -5,15 +5,15 @@
 #目标平台主要是传给./CMakeLists.txt,具体哪些平台可以使用,以及相关的编译过程,请参阅本文件和./CMakeLists.txt
 
 #!/bin/bash
-source shell.sh
+source `dirname $0`/shell.sh
 
 #main()
 if [ $# == 2 ]; then
 	#first, projectPath must exist
 	#首先,工程路径必须存在
 	projectPath=$1
-	exitWhenNoDir $projectPath
-	projectName=`basename $projectPath`
+	getAbsolutePath $projectPath
+	projectName=`basename ${absolutePath}`
 	platform=$2
 
 	#second, maybe we need a directory to put the compiled object of our source files(for make our project directory clean)
