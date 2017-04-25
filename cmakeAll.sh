@@ -1,10 +1,6 @@
 #!/bin/bash
-exitWhileError()
-{
-	if [ $? != 0 ];then
-		exit
-	fi
-}
+source `dirname $0`/shell.sh
+
 #main()
 scriptDir=`dirname $0`
 platforms="Linux Android Windows Mac" #这是目前考虑的系统列表,不完善,需要补充
@@ -21,7 +17,6 @@ do
 			#echo "platform = $para"
 			project=false
 			isPlatform=true
-			project=false
 			break
 		fi
 	done
@@ -34,6 +29,6 @@ do
 	if [ $platform != false -a $project != false ]; then
 		#echo "$project $platform"
 		$scriptDir/cmake.sh $project $platform
-		exitWhileError
+		exitWhenError
 	fi
 done
