@@ -4,31 +4,30 @@
 
 #cmake_minimum_required(VERSION 2.8)
 #project(MyCppLib)
-#include(../CompileScripts/CMakeLists.txt) #relative(or absolute) path to this file
+#include(../CompileScripts/CMakeLists.txt) #相对或者绝对路径指向本文件
 #(other things about MyCppLib)
 
 #这样做可以让大多数项目使用相同的交叉编译配置,而在各自的项目中进行差异化处理
 
 cmake_minimum_required(VERSION 2.8)
 
-message("Cmake Version: " ${CMAKE_VERSION})
-message("System Name: " ${CMAKE_SYSTEM_NAME})
-message("System Version: " ${CMAKE_SYSTEM_VERSION})
-message("System Processer: " ${CMAKE_SYSTEM_PROCESSOR})
+message("Cmake版本: " ${CMAKE_VERSION})
+message("系统名: " ${CMAKE_SYSTEM_NAME})
+message("系统版本: " ${CMAKE_SYSTEM_VERSION})
+message("系统处理器: " ${CMAKE_SYSTEM_PROCESSOR})
 
 aux_source_directory(. SRC_LIST)
 include_directories(.)
 
 if(${TARGET_SYSTEM_NAME} STREQUAL Linux)
 	message("Linux平台")
-	set(CMAKE_C_FLAGS "-Wall -O3")
+	set(CMAKE_C_FLAGS "-Wall -Werror -O2")#编译选项要把所有的警告都视为错误,因为某些警告不处理好的话可能会导致程序崩溃
 	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 	include_directories(/usr/include/GL)
 	link_directories(${LIBRARY_OUTPUT_PATH})
-elseif(${TARGET_SYSTEM_NAME} STREQUAL Android)
+elseif(${TARGET_SYSTEM_NAME} STREQUAL Android)#编译基本没有问题,但是不保证编译出来的APK用的.so文件一定没有问题
 	message("Android平台")
-	set(ANDROID_NDK /media/WORK/android/android-ndk-r10e)
-	add_definitions(-DCMAKE_TOOLCHAIN_FILE=android.toolchain.cmake -DANDROID_NDK=${ANDROID_NDK} -DCMAKE_BUILD_TYPE=Release -DANDROID_ABI="armeabi-v7a with NEON")#使用taka-no-me写的android-cmake工具链来作为辅助,在此感谢taka-no-me提供的支持
+	set(ANDROID_NDK /media/WORK/android/android-ndk-r13b)#根据情况自行修改路径
 	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 	include_directories(${ANDROID_NDK}/platforms/android-19/arch-arm/usr/include)
 	include_directories(${ANDROID_NDK}/sources/android/native_app_glue)
