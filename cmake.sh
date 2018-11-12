@@ -25,7 +25,7 @@ if [ $# == 2 ]; then
 	#同样,我们可能也需要不同的目录来放置不同平台下编译出来的库文件和执行文件
 	libPath=lib-$platform #(change the name as you like,换成你想起的名字吧)
 	mkdirp $libPath
-	exePath=exe-$platform #(change the name as you like,换成你想起的名字吧)
+	exePath=bin #(change the name as you like,换成你想起的名字吧)
 	mkdirp $exePath
 
 	#third, make a directory name $projectPath-$platform in $objectPath
