@@ -19,6 +19,9 @@ message("系统处理器: " ${CMAKE_SYSTEM_PROCESSOR})
 aux_source_directory(. SRC_LIST)
 include_directories(.)
 
+set(CMAKE_C_FLAGS "-fPIC -Wall -Werror -O2")#编译选项要把所有的警告都视为错误,因为某些警告不处理好的话可能会导致程序崩溃
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
+
 macro(srcInclude name)
 	aux_source_directory(${name} SRC_LIST)
 	include_directories(${name})
@@ -26,8 +29,6 @@ endmacro()
 
 if(${TARGET_SYSTEM_NAME} STREQUAL Linux)
 	message("Linux平台")
-	set(CMAKE_C_FLAGS "-fPIC -Wall -Werror -O2")#编译选项要把所有的警告都视为错误,因为某些警告不处理好的话可能会导致程序崩溃
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 	include_directories(/usr/include/GL)
 	link_directories(${LIBRARY_OUTPUT_PATH})
 elseif(${TARGET_SYSTEM_NAME} STREQUAL Android)#编译基本没有问题,但是不保证编译出来的APK用的.so文件一定没有问题
@@ -37,10 +38,12 @@ elseif(${TARGET_SYSTEM_NAME} STREQUAL Android)#编译基本没有问题,但是�
 	include_directories(${ANDROID_NDK}/platforms/android-19/arch-arm/usr/include)
 	include_directories(${ANDROID_NDK}/sources/android/native_app_glue)
 	link_directories(${LIBRARY_OUTPUT_PATH})
-elseif(${TARGET_SYSTEM_NAME} STREQUAL Windows)
-	message("Windows平台")
+elseif(${TARGET_SYSTEM_NAME} STREQUAL MinGW)
+	message("Linux交叉编译Windows平台")#根据情况自行修改路径
 	set(CMAKE_C_COMPILER /usr/bin/x86_64-w64-mingw32-gcc)
 	set(CMAKE_CXX_COMPILER /usr/bin/x86_64-w64-mingw32-g++)
+elseif(${TARGET_SYSTEM_NAME} STREQUAL Windows)
+	message("Windows平台")
 else()
 	message(FATAL_ERROR "未知的平台" ${TARGET_SYSTEM_NAME})
 endif()
