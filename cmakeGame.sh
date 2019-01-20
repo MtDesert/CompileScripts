@@ -8,9 +8,11 @@ executeEnv=Linux #请自行修改成当前的运行环境
 if [ $compileEnv == Windows ]; then #Windows下编译
 	generatorName="MinGW Makefiles" #推荐使用MinGW编译
 	makeCommand=mingw32-make #MinGW用的make
+	makeLuaParam=mingw
 else #默认环境(类Unix)环境
 	generatorName="Unix Makefiles"
 	makeCommand=make
+	makeLuaParam=linux
 fi
 
 cmakeG() #执行cmake过程
@@ -29,19 +31,28 @@ makeG() #执行make过程
 if [ $# == 1 ]; then
 	#设置游戏名相关的变量
 	gameName=$1 #游戏名
-	objDir=objs/lib$gameName #中间文件的目录名
+	objDir=objs #中间文件的目录名
 	outputDir=$workingDirectory/$gameName #目标文件输出目录
-	cmakeParameter="-DTARGET_SYSTEM_NAME=$executeEnv -DLIBRARY_OUTPUT_PATH=$outputDir -DEXECUTABLE_OUTPUT_PATH=$outputDir -DGAME_NAME=$gameName" #cmake命令参数,
+	cmakeParameter="-DTARGET_SYSTEM_NAME=$executeEnv -DLIBRARY_OUTPUT_PATH=$outputDir -DEXECUTABLE_OUTPUT_PATH=$outputDir -DGAME_NAME=$gameName" #cmake命令参数
+	#编译lua库
+	cd lua
+	$makeCommand $makeLuaParam
+	cd ..
+	exitWhenError
 	#创建目录
 	mkdirp $objDir
 	cd $objDir #切换目录以便执行cmake
-	cmakeG "-DGAME_LIB=1 $workingDirectory/lib$gameName"
-	makeG #开始编译
 	#编译引擎模块
-	mkdirp ../libGamesEngines
-	cd ../libGamesEngines
-	cmakeG "$workingDirectory/libGamesEngines"
+	mkdirp libGamesEngines
+	cd libGamesEngines
+	cmakeG "-DENGINE_LIB=ON $workingDirectory/libGamesEngines"
 	makeG
+	cd ..
+	#编译游戏模块
+	mkdirp lib$gameName
+	cd lib$gameName
+	cmakeG "-DGAME_LIB=ON $workingDirectory/lib$gameName"
+	makeG #开始编译
 else
 	echo "Syntax: `basename $0` gameName"
 fi
