@@ -1,8 +1,8 @@
 source `dirname $0`/shell.sh
 
 #基于cmake的编译环境
-compileEnv=Linux #请自行修改成当前的编译环境
-executeEnv=Linux #请自行修改成当前的运行环境
+compileEnv=Windows #请自行修改成当前的编译环境
+executeEnv=Windows #请自行修改成当前的运行环境
 
 #根据编译环境修改编译参数
 if [ $compileEnv == Windows ]; then #Windows下编译
@@ -34,10 +34,19 @@ if [ $# == 1 ]; then
 	objDir=objs #中间文件的目录名
 	outputDir=$workingDirectory/$gameName #目标文件输出目录
 	cmakeParameter="-DTARGET_SYSTEM_NAME=$executeEnv -DLIBRARY_OUTPUT_PATH=$outputDir -DEXECUTABLE_OUTPUT_PATH=$outputDir -DGAME_NAME=$gameName" #cmake命令参数
+	#编译freeglut
+	cd freeglut
+	mkdirp build && cd build
+	cmake -G "$generatorName" -DCMAKE_BUILD_TYPE=Release -DFREEGLUT_BUILD_SHARED_LIBS=ON ..
+	exitWhenError #cmake有时候会检测到PATH中有sh执行程序而罢工,再次运行本文件即可,如果问题依旧,那要找找其它原因
+	makeG
+	cd ../..
+	cp freeglut/build/bin/libfreeglut.dll $gameName
 	#编译lua库
 	cd lua
 	$makeCommand $makeLuaParam
 	cd ..
+	cp lua/src/lua53.dll $gameName #53指的是lua的版本号5.3.x,请根据源码的版本自行修改
 	exitWhenError
 	#创建目录
 	mkdirp $objDir
@@ -52,7 +61,11 @@ if [ $# == 1 ]; then
 	mkdirp lib$gameName
 	cd lib$gameName
 	cmakeG "-DGAME_LIB=ON $workingDirectory/lib$gameName"
-	makeG #开始编译
+	makeG
+	cd ..
+	#编译执行程序
+	cmakeG "$workingDirectory/libGamesEngines"
+	makeG
 else
 	echo "Syntax: `basename $0` gameName"
 fi
