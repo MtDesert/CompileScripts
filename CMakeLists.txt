@@ -11,23 +11,38 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-message("Cmake版本: " ${CMAKE_VERSION})
-message("系统名: " ${CMAKE_SYSTEM_NAME})
-message("系统版本: " ${CMAKE_SYSTEM_VERSION})
-message("系统处理器: " ${CMAKE_SYSTEM_PROCESSOR})
-
-aux_source_directory(. SRC_LIST)
-include_directories(.)
+#message("Cmake版本: " ${CMAKE_VERSION})
+#message("系统名: " ${CMAKE_SYSTEM_NAME})
+#message("系统版本: " ${CMAKE_SYSTEM_VERSION})
+#message("系统处理器: " ${CMAKE_SYSTEM_PROCESSOR})
 
 set(CMAKE_C_FLAGS "-fPIC -Wall -Werror -O2")#编译选项要把所有的警告都视为错误,因为某些警告不处理好的话可能会导致程序崩溃
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 link_directories(${LIBRARY_OUTPUT_PATH})
 
+#添加源文件路径和包含文件路径name
 macro(srcInclude name)
 	aux_source_directory(${name} SRC_LIST)
 	include_directories(${name})
 endmacro()
 
+#将INCLUDE_LIST目录表全部加入包含路径,以prefix为前缀
+macro(includeDirAll prefix)
+	foreach(name ${INCLUDE_LIST})
+		include_directories(${prefix}${name})
+	endforeach()
+endmacro()
+
+#将INCLUDE_LIST目录表全部加入源文件路径和包含路径
+macro(srcIncludeAll)
+	foreach(name ${INCLUDE_LIST})
+		srcInclude(${name})
+	endforeach()
+endmacro()
+
+srcInclude(.)
+
+#平台差异处理
 if(${TARGET_SYSTEM_NAME} STREQUAL Linux)
 	message("Linux平台")
 elseif(${TARGET_SYSTEM_NAME} STREQUAL Android)#编译基本没有问题,但是不保证编译出来的APK用的.so文件一定没有问题
