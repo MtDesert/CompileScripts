@@ -83,6 +83,7 @@ if [ $# == 2 ]; then
 		compile libGamesClient #客户端引擎库
 		compile lib${gameName}Client #客户端游戏库
 		compile libGamesClient -DCOMPILE_GAME_EXE=ON #客户端可执行文件
+		compile lib${gameName}Tools #工具集
 	fi
 	#编译服务端
 	if [ $clientOrServer == Server ]; then
