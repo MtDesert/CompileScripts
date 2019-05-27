@@ -49,6 +49,16 @@ compileLua() #编译lua
 	exitWhenError
 }
 
+compileCurl(){
+	cd curl
+	mkdirp build && cd build
+	cmake -G "$generatorName" ..
+	makeG
+	#编译后复制到游戏目录下
+	cd ../..
+	cp curl/build/lib/libcurl.dll $gameName
+}
+
 compile()
 {
 	name=$1
@@ -71,6 +81,7 @@ if [ $# == 2 ]; then
 	if [ $compileEnv == Windows ]; then
 		compileFreeglut
 		compileLua
+		compileCurl
 	fi
 	#创建目录
 	mkdirp $objDir
