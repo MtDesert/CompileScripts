@@ -50,13 +50,11 @@ compileLua() #编译lua
 }
 
 compileCurl(){
-	cd curl
-	mkdirp build && cd build
-	cmake -G "$generatorName" ..
-	makeG
+	cd curl/lib
+	$makeCommand -f Makefile.m32
 	#编译后复制到游戏目录下
 	cd ../..
-	cp curl/build/lib/libcurl.dll $gameName
+	cp curl/lib/libcurl.dll $gameName
 }
 
 compile()
