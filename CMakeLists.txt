@@ -20,31 +20,29 @@ set(CMAKE_C_FLAGS "-fPIC -Wall -Werror -O2")#编译选项要把所有的警告�
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 link_directories(${LIBRARY_OUTPUT_PATH})
 
+#添加包含目录,以prefix为统一前缀,
+macro(includeAll prefix)
+	foreach(name ${ARGN})
+		include_directories(${prefix}${name})
+	endforeach()
+endmacro()
+
 #添加源文件路径和包含文件路径name
 macro(srcInclude name)
 	aux_source_directory(${name} SRC_LIST)
 	include_directories(${name})
 endmacro()
 
-#将INCLUDE_LIST目录表全部加入包含路径,以prefix为前缀
-macro(includeDirAll prefix)
-	foreach(name ${INCLUDE_LIST})
-		include_directories(${prefix}${name})
+#将includeList目录表全部加入源文件路径和包含路径
+macro(srcIncludeAll prefix)
+	foreach(name ${ARGN})
+		srcInclude(${prefix}${name})
 	endforeach()
 endmacro()
-
-#将INCLUDE_LIST目录表全部加入源文件路径和包含路径
-macro(srcIncludeAll)
-	foreach(name ${INCLUDE_LIST})
-		srcInclude(${name})
-	endforeach()
-endmacro()
-
-srcInclude(.)
 
 #平台差异处理
 if(${TARGET_SYSTEM_NAME} STREQUAL Linux)
-	message("Linux平台")
+	#message("Linux平台")
 elseif(${TARGET_SYSTEM_NAME} STREQUAL Android)#编译基本没有问题,但是不保证编译出来的APK用的.so文件一定没有问题
 	message("Android平台")
 	set(ANDROID_NDK /media/WORK/android/android-ndk-r13b)#根据情况自行修改路径
@@ -61,4 +59,4 @@ else()
 	message(FATAL_ERROR "未知的平台" ${TARGET_SYSTEM_NAME})
 endif()
 
-message("Binary directory: " ${PROJECT_BINARY_DIR})
+#message("Binary directory: " ${PROJECT_BINARY_DIR})

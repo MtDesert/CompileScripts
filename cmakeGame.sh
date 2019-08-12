@@ -62,7 +62,7 @@ compile()
 	name=$1
 	para=$2
 	mkdirp $name && cd $name
-	cmakeG "$para $workingDirectory/$name"
+	cmakeG "$para ../../$name"
 	makeG
 	cd ..
 }
@@ -73,8 +73,8 @@ if [ $# == 2 ]; then
 	gameName=$1 #游戏名
 	clientOrServer=$2 #客户端还是服务端
 	objDir=objs #中间文件的目录名
-	outputDir=$workingDirectory/$gameName #目标文件输出目录
-	cmakeParameter="-DTARGET_SYSTEM_NAME=$executeEnv -DLIBRARY_OUTPUT_PATH=$outputDir -DEXECUTABLE_OUTPUT_PATH=$outputDir -DGAME_NAME=$gameName" #cmake命令参数
+	outputDir=../../$gameName #目标文件输出目录
+	cmakeParameter="-DTARGET_SYSTEM_NAME=$executeEnv -DLIBRARY_OUTPUT_PATH=$outputDir -DEXECUTABLE_OUTPUT_PATH=$outputDir" #cmake命令参数
 	#Windows编译环境下,需要编译特定依赖库
 	if [ $compileEnv == Windows ]; then
 		compileFreeglut
@@ -85,20 +85,20 @@ if [ $# == 2 ]; then
 	mkdirp $objDir
 	cd $objDir #切换目录以便执行cmake
 	#编译主要模块
-	compile libGamesEngines
-	compile lib$gameName
+	compile libGamesEngines -DGAME_NAME= #通用引擎
+	compile libGamesEngines -DGAME_NAME=$gameName #专用引擎
 	#编译客户端
 	if [ $clientOrServer == Client ]; then
-		compile libGamesClient -DCOMPILE_GAME_EXE=OFF #客户端引擎库
-		compile lib${gameName}Client #客户端游戏库
-		compile libGamesClient -DCOMPILE_GAME_EXE=ON #客户端可执行文件
-		compile lib${gameName}Tools #工具集
+		compile libGamesClient -DGAME_NAME= #客户端引擎库
+		compile libGamesClient -DGAME_NAME=$gameName #客户端游戏库
+		compile libGamesClient "-DGAME_NAME=$gameName -DCOMPILE_GAME_EXE=ON" #客户端可执行文件
 	fi
 	#编译服务端
-	if [ $clientOrServer == Server ]; then
-		compile libGamesServer
-		compile lib${gameName}Server
-	fi
+	#if [ $clientOrServer == Server ]; then
+	#	compile libGamesServer
+	#	compile lib${gameName}Server
+	#fi
+	#compile lib$gameName -DTOOLS=ON #工具集
 else
 	echo "Syntax: `basename $0` gameName clientOrServer"
 fi
