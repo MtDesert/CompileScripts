@@ -67,14 +67,18 @@ compile()
 	cd ..
 }
 
+setOutputDir()
+{
+	outputDir=$1
+	cmakeParameter="-DTARGET_SYSTEM_NAME=$executeEnv -DLIBRARY_OUTPUT_PATH=$outputDir -DEXECUTABLE_OUTPUT_PATH=$outputDir" #cmake命令参数
+}
+
 #main
 if [ $# == 2 ]; then
 	#设置游戏名相关的变量
 	gameName=$1 #游戏名
 	clientOrServer=$2 #客户端还是服务端
 	objDir=objs #中间文件的目录名
-	outputDir=$workingDirectory/$gameName #目标文件输出目录
-	cmakeParameter="-DTARGET_SYSTEM_NAME=$executeEnv -DLIBRARY_OUTPUT_PATH=$outputDir -DEXECUTABLE_OUTPUT_PATH=$outputDir" #cmake命令参数
 	#Windows编译环境下,需要编译特定依赖库
 	if [ $compileEnv == Windows ]; then
 		compileFreeglut
@@ -84,19 +88,22 @@ if [ $# == 2 ]; then
 	#创建目录
 	mkdirp $objDir
 	cd $objDir #切换目录以便执行cmake
-	#编译主要模块
-	compile libGamesEngines -DGAME_NAME= #通用引擎
-	compile libGamesEngines -DGAME_NAME=$gameName #专用引擎
 	#编译客户端
 	if [ $clientOrServer == Client ]; then
+		setOutputDir $workingDirectory/$gameName #目标文件输出目录
+		#核心部分
+		compile libGamesEngines -DGAME_NAME= #通用引擎
+		compile libGamesEngines -DGAME_NAME=$gameName #专用引擎
+		#客户端部分
 		compile libGamesClient -DGAME_NAME= #客户端引擎库
 		compile libGamesClient "-DGAME_NAME=$gameName -DCOMPILE_GAME_EXE=OFF" #客户端游戏库
 		compile libGamesClient "-DGAME_NAME=$gameName -DCOMPILE_GAME_EXE=ON" #客户端可执行文件
 	fi
 	#编译服务端
 	if [ $clientOrServer == Server ]; then
+		setOutputDir $workingDirectory/GameServer #目标文件输出目录
+		compile libGamesEngines -DGAME_NAME= #通用引擎
 		compile libGamesServer -DGAME_NAME= #服务端引擎库
-		#compile libGamesServer
 	fi
 	#compile lib$gameName -DTOOLS=ON #工具集
 else
