@@ -42,13 +42,10 @@ endmacro()
 
 #平台差异处理
 if(${TARGET_SYSTEM_NAME} STREQUAL Linux)
-	#message("Linux平台")
+	message("Linux平台")
 elseif(${TARGET_SYSTEM_NAME} STREQUAL Android)#编译基本没有问题,但是不保证编译出来的APK用的.so文件一定没有问题
 	message("Android平台")
-	set(ANDROID_NDK /media/WORK/android/android-ndk-r13b)#根据情况自行修改路径
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
-	include_directories(${ANDROID_NDK}/platforms/android-19/arch-arm/usr/include)
-	include_directories(${ANDROID_NDK}/sources/android/native_app_glue)
+	set(NDK_ROOT /media/WORK/android/android-ndk-r20)#根据情况自行修改路径
 elseif(${TARGET_SYSTEM_NAME} STREQUAL MinGW)
 	message("Linux交叉编译Windows平台")#根据情况自行修改路径
 	set(CMAKE_C_COMPILER /usr/bin/x86_64-w64-mingw32-gcc)

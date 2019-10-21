@@ -17,7 +17,16 @@ fi
 
 cmakeG() #执行cmake过程
 {
-	cmake -G "$generatorName" $cmakeParameter $1
+	#设定cmake参数
+	para="-DTARGET_SYSTEM_NAME=$executeEnv" #目标系统
+	para=$para" -DLIBRARY_OUTPUT_PATH=$outputDir" #库文件输出目录
+	para=$para" -DEXECUTABLE_OUTPUT_PATH=$outputDir" #执行文件输出目录
+	if [ $executeEnv == Android ]; then
+		para=$para" -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake" #工具链
+		para=$para" -DANDROID_PLATFORM=29" #平台等级,根据情况自行修改
+	fi
+	#执行cmake
+	cmake -G "$generatorName" $para $1
 	exitWhenError
 }
 
@@ -67,12 +76,6 @@ compile()
 	cd ..
 }
 
-setOutputDir()
-{
-	outputDir=$1
-	cmakeParameter="-DTARGET_SYSTEM_NAME=$executeEnv -DLIBRARY_OUTPUT_PATH=$outputDir -DEXECUTABLE_OUTPUT_PATH=$outputDir" #cmake命令参数
-}
-
 #main
 if [ $# == 2 ]; then
 	#设置游戏名相关的变量
@@ -90,8 +93,13 @@ if [ $# == 2 ]; then
 	cd $objDir #切换目录以便执行cmake
 	#编译客户端
 	if [ $clientOrServer == Client ]; then
-		setOutputDir $workingDirectory/$gameName #目标文件输出目录
+		if [ $executeEnv == Android ]; then
+			outputDir=$workingDirectory/NativeActivity/libs
+		else
+			outputDir=$workingDirectory/$gameName #目标文件输出目录
+		fi
 		#核心部分
+		compile lua
 		compile libGamesEngines -DGAME_NAME= #通用引擎
 		compile libGamesEngines -DGAME_NAME=$gameName #专用引擎
 		#客户端部分
