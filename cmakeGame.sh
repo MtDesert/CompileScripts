@@ -8,11 +8,9 @@ executeEnv=Linux #请自行修改成当前的运行环境
 if [ $compileEnv == Windows ]; then #Windows下编译
 	generatorName="MinGW Makefiles" #推荐使用MinGW编译
 	makeCommand=mingw32-make #MinGW用的make
-	makeLuaParam=mingw
 else #默认环境(类Unix)环境
 	generatorName="Unix Makefiles"
 	makeCommand=make
-	makeLuaParam=linux
 fi
 
 cmakeG() #执行cmake过程
@@ -48,16 +46,6 @@ compileFreeglut() #编译freeglut
 	cp freeglut/build/bin/libfreeglut.dll $gameName
 }
 
-compileLua() #编译lua
-{
-	cd lua
-	$makeCommand $makeLuaParam
-	cd ..
-	#编译后复制到游戏目录下
-	cp lua/src/lua53.dll $gameName #53指的是lua的版本号5.3.x,请根据源码的版本自行修改
-	exitWhenError
-}
-
 compileCurl(){
 	cd curl/lib
 	$makeCommand -f Makefile.m32
@@ -85,8 +73,6 @@ if [ $# == 2 ]; then
 	#Windows编译环境下,需要编译特定依赖库
 	if [ $compileEnv == Windows ]; then
 		compileFreeglut
-		compileLua
-		compileCurl
 	fi
 	#创建目录
 	mkdirp $objDir
@@ -99,7 +85,7 @@ if [ $# == 2 ]; then
 			outputDir=$workingDirectory/$gameName #目标文件输出目录
 		fi
 		#核心部分
-		compile lua
+		compile lua #lua核心
 		compile libGamesEngines -DGAME_NAME= #通用引擎
 		compile libGamesEngines -DGAME_NAME=$gameName #专用引擎
 		#客户端部分
