@@ -84,10 +84,11 @@ if [ $# == 2 ]; then
 		else
 			outputDir=$workingDirectory/$gameName #目标文件输出目录
 		fi
+		rm ../$gameName/*.so
 		#核心部分
 		compile lua #lua核心
 		compile libGamesEngines -DGAME_NAME= #通用引擎
-		compile libGamesEngines -DGAME_NAME=$gameName #专用引擎
+		compile libGamesEngines "-DGAME_NAME=$gameName -DCOMPILE_TOOLS=OFF" #专用引擎
 		#客户端部分
 		compile libGamesClient -DGAME_NAME= #客户端引擎库
 		compile libGamesClient "-DGAME_NAME=$gameName -DCOMPILE_GAME_EXE=OFF" #客户端游戏库
@@ -99,7 +100,13 @@ if [ $# == 2 ]; then
 		compile libGamesEngines -DGAME_NAME= #通用引擎
 		compile libGamesServer -DGAME_NAME= #服务端引擎库
 	fi
-	#compile lib$gameName -DTOOLS=ON #工具集
+	#编译工具集
+	if [ $clientOrServer == Tools ]; then
+		outputDir=$workingDirectory/$gameName #目标文件输出目录
+		compile libGamesEngines -DGAME_NAME= #通用引擎
+		compile libGamesEngines "-DGAME_NAME=$gameName -DCOMPILE_TOOLS=OFF" #专用引擎
+		compile libGamesEngines "-DGAME_NAME=$gameName -DCOMPILE_TOOLS=ON" #工具集
+	fi
 else
 	echo "Syntax: `basename $0` gameName clientOrServer"
 fi
