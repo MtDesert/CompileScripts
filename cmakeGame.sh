@@ -84,7 +84,7 @@ if [ $# == 2 ]; then
 		else
 			outputDir=$workingDirectory/$gameName #目标文件输出目录
 		fi
-		rm ../$gameName/*.so
+		#rm ../$gameName/*.so
 		#核心部分
 		compile lua #lua核心
 		compile libGamesEngines -DGAME_NAME= #通用引擎
@@ -96,7 +96,8 @@ if [ $# == 2 ]; then
 	fi
 	#编译服务端
 	if [ $clientOrServer == Server ]; then
-		setOutputDir $workingDirectory/GameServer #目标文件输出目录
+		outputDir=$workingDirectory/GameServer #目标文件输出目录
+		compile lua
 		compile libGamesEngines -DGAME_NAME= #通用引擎
 		compile libGamesServer -DGAME_NAME= #服务端引擎库
 	fi
