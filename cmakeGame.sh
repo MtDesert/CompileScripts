@@ -96,7 +96,7 @@ if [ $# == 2 ]; then
 	fi
 	#编译服务端
 	if [ $clientOrServer == Server ]; then
-		outputDir=$workingDirectory/GameServer #目标文件输出目录
+		outputDir=$workingDirectory/GamesServer #目标文件输出目录
 		compile lua
 		compile libGamesEngines -DGAME_NAME= #通用引擎
 		compile libGamesServer -DGAME_NAME= #服务端引擎库
