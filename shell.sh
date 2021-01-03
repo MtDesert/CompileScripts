@@ -4,29 +4,26 @@
 exitWhenError() #只要出错就退出,这样我们可以检查在哪一步出了问题
 {
 	if [ $? != 0 ];then
+		echo $1
 		exit
 	fi
 }
 mkdirp() #创建成功或者目录存在的时候继续往下执行,否则退出并报错(mkdir自带报错功能)
 {
 	mkdir -p $1
-	exitWhenError
+	exitWhenError 目录创建失败:$1
 }
-exitWhenNoDir() #当目录不存在的时候退出
+changeDir()
 {
-	if [ ! -d $1 ]; then
-		echo "No project directory $1"
-		exit
-	fi
+	cd $1
+	exitWhenError 目录切换失败:$1
 }
 getAbsolutePath() #获取首参数的绝对路径(用于各种复杂的.和..的路径名称)
 {
 	currentPath=`pwd`
-	cd $1
-	exitWhenError
+	changeDir $1
 	absolutePath=`pwd`
-	cd ${currentPath} #记得回到原路径
-	exitWhenError
+	changeDir ${currentPath} #记得回到原路径
 }
 
 #变量部分

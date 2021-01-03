@@ -1,11 +1,11 @@
-source `dirname $0`/shell.sh
+source `dirname $0`/make.sh
 
 compile()
 {
 	name=$1
 	para=$2
 	mkdirp $name
-	make -f ../$name/Makefile $para
+	make -f ../$name/Makefile projectDir=../$name $para
 	exitWhenError
 }
 
