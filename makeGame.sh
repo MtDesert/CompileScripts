@@ -1,11 +1,8 @@
-source `dirname $0`/make.sh
+source `dirname $0`/shell.sh
 
 compile()
 {
-	name=$1
-	para=$2
-	mkdirp $name
-	make -f ../$name/Makefile projectDir=../$name $para
+	$scriptDirectory/make.sh $1 $2
 	exitWhenError
 }
 
@@ -14,28 +11,19 @@ if [ $# == 2 ]; then
 	#设置游戏名相关的变量
 	gameName=$1 #游戏名
 	clientOrServer=$2 #客户端还是服务端
-	objDir=objects #中间文件的目录名
-	#创建目录
-	mkdirp $objDir
-	cd $objDir #切换目录以便执行cmake
+	#编译主模块
+	compile lua #lua核心
+	compile curl
+	compile libGamesEngines #通用引擎
+	compile lib$gameName #游戏内核
 	#编译客户端
 	if [ $clientOrServer == Client ]; then
-		rm ../$gameName/*.so
-		rm ../$gameName/*.exe
-		rm *.so
-		rm *.exe
-		#核心部分
-		compile lua #lua核心
-		compile libGamesEngines #通用引擎
-		compile lib$gameName #游戏内核
 		compile libGamesClient #客户端引擎
-		mkdirp lib${gameName}Client
-		compile lib$gameName Client=true #客户端游戏库
-		mkdirp libGamesClient/executable
+		compile lib$gameName Client=true #游戏客户端
 		compile libGamesClient Executable=$gameName #客户端可执行文件
 		#移动文件到游戏目录
-		cp *.so ../$gameName
-		cp *.exe ../$gameName
+		cp objects/*.so $gameName
+		cp objects/GamesGLUT $gameName
 	fi
 	#编译服务端
 	if [ $clientOrServer == Server ]; then

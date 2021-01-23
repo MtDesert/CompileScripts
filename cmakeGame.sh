@@ -1,113 +1,38 @@
 source `dirname $0`/shell.sh
 
-#基于cmake的编译环境
-compileEnv=Linux #请自行修改成当前的编译环境
-executeEnv=Linux #请自行修改成当前的运行环境
-
-#根据编译环境修改编译参数
-if [ $compileEnv == Windows ]; then #Windows下编译
-	generatorName="MinGW Makefiles" #推荐使用MinGW编译
-	makeCommand=mingw32-make #MinGW用的make
-else #默认环境(类Unix)环境
-	generatorName="Unix Makefiles"
-	makeCommand=make
-fi
-
-cmakeG() #执行cmake过程
-{
-	#设定cmake参数
-	para="-DTARGET_SYSTEM_NAME=$executeEnv" #目标系统
-	para=$para" -DLIBRARY_OUTPUT_PATH=$outputDir" #库文件输出目录
-	para=$para" -DEXECUTABLE_OUTPUT_PATH=$outputDir" #执行文件输出目录
-	if [ $executeEnv == Android ]; then
-		para=$para" -DCMAKE_TOOLCHAIN_FILE=${NDK_ROOT}/build/cmake/android.toolchain.cmake" #工具链
-		para=$para" -DANDROID_PLATFORM=29" #平台等级,根据情况自行修改
-	fi
-	#执行cmake
-	cmake -G "$generatorName" $para $1
-	exitWhenError
-}
-
-makeG() #执行make过程
-{
-	$makeCommand
-	exitWhenError
-}
-
-compileFreeglut() #编译freeglut
-{
-	cd freeglut
-	mkdirp build && cd build
-	cmake -G "$generatorName" -DCMAKE_BUILD_TYPE=Release -DFREEGLUT_BUILD_DEMOS=OFF -DFREEGLUT_BUILD_SHARED_LIBS=ON -DFREEGLUT_BUILD_STATIC_LIBS=OFF ..
-	exitWhenError #cmake有时候会检测到PATH中有sh执行程序而罢工,再次运行本文件即可,如果问题依旧,那要找找其它原因
-	makeG
-	#编译后复制到游戏目录下
-	cd ../..
-	cp freeglut/build/bin/libfreeglut.dll $gameName
-}
-
-compileCurl(){
-	cd curl/lib
-	$makeCommand -f Makefile.m32
-	#编译后复制到游戏目录下
-	cd ../..
-	cp curl/lib/libcurl.dll $gameName
-}
-
 compile()
 {
-	name=$1
-	para=$2
-	mkdirp $name && cd $name
-	cmakeG "$para $workingDirectory/$name"
-	makeG
-	cd ..
+	$scriptDirectory/cmake.sh $1 $2 $3
 }
 
 #main
 if [ $# == 2 ]; then
 	#设置游戏名相关的变量
 	gameName=$1 #游戏名
-	clientOrServer=$2 #客户端还是服务端
-	objDir=objs #中间文件的目录名
-	#Windows编译环境下,需要编译特定依赖库
-	if [ $compileEnv == Windows ]; then
-		compileFreeglut
+	options=$2 #客户端还是服务端
+	#输出目录
+	export libPath=$gameName
+	export exePath=$gameName
+	#是否编译工具集(在编译核心模块和游戏模块之后编译)
+	if [ $options == Tools ]; then
+		COMPILE_TOOLS=ON
 	fi
-	#创建目录
-	mkdirp $objDir
-	cd $objDir #切换目录以便执行cmake
+	#编译核心
+	compile lua #lua核心
+	compile libGamesEngines -DGAME_NAME=$gameName -DCOMPILE_TOOLS=$COMPILE_TOOLS #通用引擎
 	#编译客户端
-	if [ $clientOrServer == Client ]; then
-		if [ $executeEnv == Android ]; then
-			outputDir=$workingDirectory/NativeActivity/libs
-		else
-			outputDir=$workingDirectory/$gameName #目标文件输出目录
-		fi
-		#rm ../$gameName/*.so
-		#核心部分
-		compile lua #lua核心
-		compile libGamesEngines -DGAME_NAME= #通用引擎
-		compile libGamesEngines "-DGAME_NAME=$gameName -DCOMPILE_TOOLS=OFF" #专用引擎
-		#客户端部分
-		compile libGamesClient -DGAME_NAME= #客户端引擎库
-		compile libGamesClient "-DGAME_NAME=$gameName -DCOMPILE_GAME_EXE=OFF" #客户端游戏库
-		compile libGamesClient "-DGAME_NAME=$gameName -DCOMPILE_GAME_EXE=ON" #客户端可执行文件
+	if [ $options == Client ]; then
+		echo jiujiujiu
+		#compile libGamesClient #客户端引擎库
+		#compile libGamesClient -DGAME_NAME=$gameName #客户端游戏库
+		#compile libGamesClient -DGAME_NAME=$gameName -DCOMPILE_GAME_EXE=ON #客户端可执行文件
 	fi
 	#编译服务端
-	if [ $clientOrServer == Server ]; then
+	if [ $options == Server ]; then
 		outputDir=$workingDirectory/GamesServer #目标文件输出目录
-		compile lua
-		compile libGamesEngines -DGAME_NAME= #通用引擎
-		compile libGamesServer -DGAME_NAME= #服务端引擎库
-	fi
-	#编译工具集
-	if [ $clientOrServer == Tools ]; then
-		outputDir=$workingDirectory/$gameName #目标文件输出目录
-		compile libGamesEngines -DGAME_NAME= #通用引擎
-		compile libGamesEngines "-DGAME_NAME=$gameName -DCOMPILE_TOOLS=OFF" #专用引擎
-		compile libGamesEngines "-DGAME_NAME=$gameName -DCOMPILE_TOOLS=ON" #工具集
+		compile libGamesServer #服务端引擎库
+		compile libGamesServer -DGAME_NAME=$gameName #服务端游戏库
 	fi
 else
-	echo "Syntax: `basename $0` gameName clientOrServer"
+	echo "Syntax: `basename $0` gameName option"
 fi

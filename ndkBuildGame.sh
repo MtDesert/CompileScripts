@@ -16,6 +16,7 @@ if [ $# == 1 ]; then
 	compile lib$gameName
 	compile libGamesClient
 	compile lib${gameName} Client=true
+	compile libGamesClient Executable=$gameName
 else
 	echo "Syntax: `basename $0` gameName"
 fi
