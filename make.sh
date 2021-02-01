@@ -1,23 +1,58 @@
 source `dirname $0`/shell.sh
 
+mkFile=Makefile
 #参数
-projectName=$1 #工程名
-para=$2 #其它参数
-echoInfo 编译工程${projectName}
-echoInfo 参数${para}
-#变量默认值
-makeCommand=${makeCommand:=make} #make命令名
-DEST_PLATFORM=${DEST_PLATFORM:=Linux} #目标环境
-objDir=${objDir:=objs} #中间文件输出目录
+if [ $# == 0 ]; then #显示帮助
+	echo 根据工程路径下的${mkFile}来编译
+	echo 语法A: `basename $0` 工程路径
+	echo 语法B: `basename $0` 参数表
+	echo "语法A只针对1个参数,主要用于常规(make,mingw32-make等)编译命令"
+	echo "语法B针对n个参数,主要用于特殊(比如ndk-build需要指定一堆参数)编译命令"
+	exit
+elif [ $# == 1 ]; then #只有一个参数,那就是工程路径
+	echoInfo 工程路径${projectPath:=$1}
+fi
+#工程路径可能是一大串路径,我们可以逐个检查路径下有没有$mkFile,然后再执行make
+scanMakeFilePath $projectPath
+if [ $makeFilePath ]; then
+	echoWarn ${mkFile}所在路径:${makeFilePath}
+else
+	exitWhenError ${mkFile}不存在,退出
+fi
 #变量修正
 if [[ $OS =~ Windows ]]; then #Windows环境
 	makeCommand=mingw32-make #MinGW用的make
 fi
-#创建目录
-mkdirp $objDir
+#变量默认值
+echoInfo make命令:${makeCommand:=make} #make命令名
+echoInfo 目标环境:${DEST_PLATFORM:=Linux} #目标环境
+echoInfo 中间目录:${objDir:=objs} #中间文件输出目录
+#将多出来的部分当作参数
+makeParameters=${projectPath/"$makeFilePath"/}
+makeParameters=${makeParameters/"/"/}
+if [ $makeParameters ]; then
+	makeParameters="$makeParameters=true"
+fi
+#推测Makefile参数
+if [ $# == 1 ]; then #总参数
+	makeParameters="-f ../${makeFilePath}/${mkFile} projectDir=../${makeFilePath} projectPath=${projectPath} DEST_PLATFORM=$DEST_PLATFORM $makeParameters"
+else
+	makeParameters="$* $makeParameters"
+fi
+if [ $gameName ]; then
+	makeParameters="$makeParameters Executable=$gameName"
+fi
+echoWarn ${makeCommand}参数:$makeParameters
+
+#准备就绪,开始编译,创建缓存目录
+changeDir $workingDirectory
+makeDir $objDir
 changeDir $objDir
-mkdirp $projectName #中间目录中创建工程目录(放中间文件用)
-#编译客户端
-$makeCommand -f ../$projectName/Makefile projectDir=../$projectName DEST_PLATFORM=$DEST_PLATFORM $para
+makeDir $projectPath #缓存目录中创建工程目录(放中间文件用)
+#开始执行make
+if [ $makeClean ]; then #检查是否要清除缓冲
+	$makeCommand $makeParameters clean
+fi
+$makeCommand $makeParameters
 exitWhenError make失败
-echoOK 工程${projectName}构建完成
+echoOK 工程${projectPath}构建完成

@@ -9,7 +9,7 @@ rm -R $destDir/*
 for cpuType in `ls $srcDir`
 do
 	echo $cpuType
-	mkdirp $destDir/$cpuType
+	makeDir $destDir/$cpuType
 	cp $srcDir/$cpuType/*.so $destDir/$cpuType
 	exitWhenError 复制出错
 done

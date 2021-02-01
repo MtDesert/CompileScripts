@@ -3,10 +3,10 @@ source `dirname $0`/shell.sh
 function shredFile() #粉碎文件
 {
 	if [ $shredMode == remove ]; then
-		#echo 删除文件:`pwd`/$1
+		echoWarn 删除文件:`pwd`/$1
 		rm $1
 	else
-		#echo 粉碎文件:`pwd`/$1
+		echoWarn 粉碎文件:`pwd`/$1
 		shred -fuz $1
 	fi
 	exitWhenError $1:文件删除出错
@@ -22,9 +22,9 @@ function shredDir() #粉碎目录
 	done
 	#删除自己
 	changeDir ..
-	echo 删除目录:`pwd`/$1
+	echoWarn 删除目录:`pwd`/$1
 	rmdir $1
-	exitWhenError $1:目录删除出错
+	exitWhenError 目录删除出错:$1
 }
 
 shredFilename() #粉碎文件或目录
@@ -50,6 +50,7 @@ if [ $# -ge 1 ]; then
 	changeDir ..
 	shredFilename `basename $name`
 else
-	echo "语法: `basename $0` [-remove] 文件名或目录名"
+	echo "语法: `basename $0` [-remove] 目录名"
 	echo 当带有-remove时候,删除文件执行的是rm命令而不是shred命令
+	echoWarn 此脚本主要用于粉碎目录,粉碎文件请使用shred
 fi

@@ -15,10 +15,10 @@ if [ -z $exePath ]; then #默认程序输出目录
 	exePath=bin
 fi
 #创建文件夹
-mkdirp $objectPath
-mkdirp $objectPath/$projectName
-mkdirp $libPath
-mkdirp $exePath
+makeDir $objectPath
+makeDir $objectPath/$projectName
+makeDir $libPath
+makeDir $exePath
 #根据系统调整参数
 if [[ $OS =~ Windows ]]; then
 	generatorName="MinGW Makefiles" #推荐使用MinGW编译

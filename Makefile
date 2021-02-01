@@ -17,18 +17,25 @@ allIncDir:=$(filter-out /% ../%,$(allIncDir)) #先处理非"/"开头的目录
 allIncDir:=$(patsubst %,$(projectDir)/%,$(allIncDir)) #所有包含目录加上工程名
 allIncDir+=$(rootIncDir) #重新添加
 allIncDir:=$(subst /.,,$(allIncDir)) #去掉/.
+#库命名方式
+libPrefix:=lib
+libSuffix:=.so
+ifeq ($(DEST_PLATFORM),Windows)
+libSuffix:=.dll
+endif
 #链接库和中间文件
 sysLibs:=$(patsubst %,-l%,$(sysLibs)) #给每个系统库都加上链接格式
-linkUserLibs:=$(patsubst %,-l%,$(userLibs)) #给每个自定义库都加上链接格式
+linkUserLibs:=$(patsubst %,$(libPrefix)%$(libSuffix),$(userLibs)) #给每个自定义库都加上链接格式
 allObjsC:=$(patsubst %.c,%.o,$(allSrcC)) #利用每个c源文件推导出中间文件
 allObjsCpp:=$(patsubst %.cpp,%.o,$(allSrcCpp)) #利用每个cpp源文件推导出中间文件
 #不要把中间文件和源文件放在一起,以防污染工程目录
 allObjsC:=$(strip $(patsubst ../%,%,$(allObjsC)))
 allObjsCpp:=$(strip $(patsubst ../%,%,$(allObjsCpp)))
+
 #目标
 libName:=$(strip $(libName))
 exeName:=$(strip $(exeName))
-targetFile:=$(strip $(if $(libName),lib$(libName).so,$(exeName))) #确定本次编译目标
+targetFile:=$(strip $(if $(libName),$(libPrefix)$(libName)$(libSuffix),$(exeName))) #确定本次编译目标
 isShared:=$(strip $(if $(libName),-shared,)) #编译共享库的选项
 
 allDefines:=$(strip $(patsubst %,-D%,$(allDefines))) #所有宏定义加上"-D"
@@ -72,23 +79,22 @@ ifneq ($(Executable),)
 LOCAL_SRC_FILES+=$(NDK_ROOT)/sources/android/native_app_glue/android_native_app_glue.c
 LOCAL_C_INCLUDES+=$(NDK_ROOT)/sources/android/native_app_glue
 endif
+moduleName:=$(LOCAL_MODULE)#备份
 include $($(if isShared,BUILD_SHARED_LIBRARY,BUILD_EXECUTABLE))
+#编译规则
+clean:
+	rm -rfv local/$(APP_ABI)/objs/$(moduleName)
 
 else #使用常规编译
 
 $(foreach name,$(allSrcDir),$(shell mkdir -p $(projectName)/$(name))) #创建各种目录
+$(if $(Executable),$(shell mkdir -p $(projectName)/executable),)
 
 #选择编译器
 ifeq ($(DEST_PLATFORM),MinGW) #Linux交叉编译Windows程序
 CC=/usr/bin/x86_64-w64-mingw32-gcc
 CXX=/usr/bin/x86_64-w64-mingw32-g++
 LINK_DIR=-L/usr/x86_64-w64-mingw32/lib #这是编译系统的lib目录
-else ifeq ($(DEST_PLATFORM),Windows) #Windows下的MinGW
-CC=C:/MinGW/bin/mingw32-gcc.exe
-CXX=C:/MinGW/bin/mingw32-g++.exe
-LINK_DIR=-LC:/MinGW/lib #这是编译系统的lib目录
-else #Linux系统下编译
-CC=gcc
 endif
 
 #编译选项
@@ -104,5 +110,7 @@ $(allObjsCpp):%.o:../%.cpp #编译cpp文件
 	$(CXX) -c $< $(allIncDir) $(CXX_FLAGS) $(allDefines)-o $@
 $(allObjsC):%.o:../%.c #编译c文件
 	$(CC) -c $< $(allIncDir) $(CC_FLAGS) $(allDefines)-o $@
+clean:
+	rm -rfv $(projectPath)
 endif
 $(info Makefile总文件结束)
