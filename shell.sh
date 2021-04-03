@@ -50,7 +50,11 @@ changeDir(){ #切换目录,失败时候报错
 #扫描当前目录下有没有Makefile,没有则返回上级目录继续找,直到当前目录为工作目录或根目录
 #找到时结果存在makeFilePath
 scanMakeFilePath(){
-	changeDir $1
+	makeFilePath=$1
+	if [ -f $makeFilePath ]; then #如果路径为文件,则换成其所在的路径
+		makeFilePath=`dirname $makeFilePath`
+	fi
+	changeDir $makeFilePath
 	makeFilePath= #清空结果
 	while [ $workingDirectory != `pwd` ]
 	do

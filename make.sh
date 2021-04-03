@@ -1,5 +1,6 @@
 source `dirname $0`/shell.sh
 
+clear #清屏,如果想看make.sh前的步骤也可以不清屏
 mkFile=Makefile
 #参数
 if [ $# == 0 ]; then #显示帮助
@@ -27,20 +28,15 @@ fi
 echoInfo make命令:${makeCommand:=make} #make命令名
 echoInfo 目标环境:${DEST_PLATFORM:=Linux} #目标环境
 echoInfo 中间目录:${objDir:=objs} #中间文件输出目录
-#将多出来的部分当作参数
-makeParameters=${projectPath/"$makeFilePath"/}
-makeParameters=${makeParameters/"/"/}
-if [ $makeParameters ]; then
-	makeParameters="$makeParameters=true"
-fi
 #推测Makefile参数
-if [ $# == 1 ]; then #总参数
-	makeParameters="-f ../${makeFilePath}/${mkFile} projectDir=../${makeFilePath} projectPath=${projectPath} DEST_PLATFORM=$DEST_PLATFORM $makeParameters"
-else
-	makeParameters="$* $makeParameters"
+if [ $# == 1 ]; then #通用参数
+	makeParameters="-f ../${makeFilePath}/${mkFile} projectDir=../${makeFilePath} projectPath=${projectPath} DEST_PLATFORM=$DEST_PLATFORM"
 fi
-if [ $gameName ]; then
-	makeParameters="$makeParameters Executable=$gameName"
+if [ $gameName ]; then #特殊参数,指明游戏名
+	makeParameters="$makeParameters GAME_NAME=$gameName"
+fi
+if [ $exeName ]; then #特殊参数,指明执行程序名
+	makeParameters="$makeParameters exeName=$exeName"
 fi
 echoWarn ${makeCommand}参数:$makeParameters
 

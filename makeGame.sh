@@ -16,33 +16,43 @@ if [ $# == 2 ]; then
 	#编译主模块
 	compile lua #lua核心
 	compile curl
-	if [ $DEST_PLATFORM == Windows ]; then
-		compile freeglut
-	fi
 	compile libGamesEngines #通用引擎
 	compile lib$gameName/Game #游戏内核
 	#编译客户端
 	if [ $clientOrServer == Client ]; then
+		if [ $DEST_PLATFORM == Windows ]; then
+			compile freeglut
+		fi
 		compile libGamesClient #客户端引擎
 		compile lib$gameName/Client #游戏客户端
 		export gameName #需要在此时导出给make.sh使用
 		compile libGamesClient/executable #客户端可执行文件
-		#移动文件到游戏目录
+		#编译完成,确定扩展名
 		if [ $DEST_PLATFORM == Windows ]; then
-			cp objs/*.dll $gameName
-			cp objs/*.exe $gameName
+			dllSuffix=.dll
+			exeSuffix=.exe
 		else
-			cp objs/*.so $gameName
-			cp objs/GamesGLUT $gameName
+			dllSuffix=.so
+			exeSuffix=
 		fi
+		#移动文件到游戏目录
+		for filename in lua curl GamesEngines $gameName freeglut GamesClient ${gameName}Client
+		do
+			cp objs/lib${filename}${dllSuffix} $gameName
+		done
+		cp objs/GamesGLUT$exeSuffix $gameName
 	fi
 	#编译服务端
 	if [ $clientOrServer == Server ]; then
-		setOutputDir $workingDirectory/GameServer #目标文件输出目录
-		compile libGamesEngines -DGAME_NAME= #通用引擎
-		compile libGamesServer -DGAME_NAME= #服务端引擎库
+		compile libGamesServer #服务端引擎
+		compile lib$gameName/Server #游戏客户端
 	fi
-	#compile lib$gameName -DTOOLS=ON #工具集
+	#编译工具集
+	if [ $clientOrServer == Tools ]; then
+		compile libGamesTools
+		./libGamesTools/make.sh #使用脚本自定义的编译过程
+		#compile lib$gameName/Tools
+	fi
 else
-	echo "Syntax: `basename $0` gameName clientOrServer"
+	echo "语法: `basename $0` 游戏名 Client|Server|Tools"
 fi

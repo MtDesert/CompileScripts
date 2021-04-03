@@ -7,7 +7,7 @@ projectName:=$(shell basename $(projectDir))
 
 #源文件的目录
 allSrcC:=$(strip $(foreach name,$(allSrcDir),$(wildcard $(projectDir)/$(name)/*.c))) #搜索出所有c文件
-allSrcCpp:=$(strip $(foreach name,$(allSrcDir),$(wildcard $(projectDir)/$(name)/*.cpp))) $(if $(Executable),$(allSrcCpp),) #搜索出所有cpp文件
+allSrcCpp:=$(strip $(foreach name,$(allSrcDir),$(wildcard $(projectDir)/$(name)/*.cpp))) $(if $(exeName),$(allSrcCpp),) #搜索出所有cpp文件
 allSrcCpp:=$(subst /./,/,$(allSrcCpp)) #去掉/./
 #包含目录
 allIncDir+=$(allSrcDir) #源文件的目录也当作包含目录
@@ -41,7 +41,7 @@ isShared:=$(strip $(if $(libName),-shared,)) #编译共享库的选项
 allDefines:=$(strip $(patsubst %,-D%,$(allDefines))) #所有宏定义加上"-D"
 
 #输出各种信息
-ifeq (""," ")#多行注释的一种方法
+ifeq ("","")#多行注释的一种方法
 $(info 工程名$(projectName))
 $(info 工程目录$(projectDir))
 $(info 宏定义$(allDefines))
@@ -75,7 +75,7 @@ LOCAL_LDLIBS:=-lc -ldl -lm -lz -llog -landroid -lEGL -lGLESv1_CM -lGLESv2#所依
 LOCAL_LDFLAGS:=-L../objsAndroid/local/$(APP_ABI) $(linkUserLibs)#所依赖的自定义库
 LOCAL_CFLAGS:=$(allDefines)
 #需要编译apk用的执行程序
-ifneq ($(Executable),)
+ifneq ($(executable),)
 LOCAL_SRC_FILES+=$(NDK_ROOT)/sources/android/native_app_glue/android_native_app_glue.c
 LOCAL_C_INCLUDES+=$(NDK_ROOT)/sources/android/native_app_glue
 endif
@@ -88,14 +88,6 @@ clean:
 else #使用常规编译
 
 $(foreach name,$(allSrcDir),$(shell mkdir -p $(projectName)/$(name))) #创建各种目录
-$(if $(Executable),$(shell mkdir -p $(projectName)/executable),)
-
-#选择编译器
-ifeq ($(DEST_PLATFORM),MinGW) #Linux交叉编译Windows程序
-CC=/usr/bin/x86_64-w64-mingw32-gcc
-CXX=/usr/bin/x86_64-w64-mingw32-g++
-LINK_DIR=-L/usr/x86_64-w64-mingw32/lib #这是编译系统的lib目录
-endif
 
 #编译选项
 CC_FLAGS:=$(strip -fPIC -Wall -Werror -O2)
