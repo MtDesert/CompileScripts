@@ -15,7 +15,7 @@ if [ $# == 2 ]; then
 	#export makeClean=true
 	#编译主模块
 	compile lua #lua核心
-	compile curl
+	#compile curl
 	compile libGamesEngines #通用引擎
 	compile lib$gameName/Game #游戏内核
 	#编译客户端
